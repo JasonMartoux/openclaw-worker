@@ -276,6 +276,32 @@ if (isOpenAI) {
     if (!currentPrimary || !allowlisted) {
         config.agents.defaults.model.primary = desiredPrimary;
     }
+} else if (process.env.MINIMAX_API_KEY) {
+    // MiniMax as primary provider
+    console.log('Configuring MiniMax as primary provider');
+    config.models = config.models || {};
+    config.models.providers = config.models.providers || {};
+    config.models.providers.minimax = {
+        apiKey: process.env.MINIMAX_API_KEY,
+        models: [
+            { id: 'MiniMax-M2.1', name: 'MiniMax M2.1', contextWindow: 1000000 },
+            { id: 'MiniMax-M2.1-lightning', name: 'MiniMax M2.1 Lightning', contextWindow: 1000000 },
+            { id: 'MiniMax-M2', name: 'MiniMax M2', contextWindow: 1000000 },
+        ]
+    };
+    // Add models to the allowlist
+    config.agents.defaults.models = config.agents.defaults.models || {};
+    config.agents.defaults.models['minimax/MiniMax-M2.1'] = { alias: 'M2.1' };
+    config.agents.defaults.models['minimax/MiniMax-M2.1-lightning'] = { alias: 'M2.1 Lightning' };
+    config.agents.defaults.models['minimax/MiniMax-M2'] = { alias: 'M2' };
+
+    // Set MiniMax M2.1 as primary, preserve user choice if valid
+    const desiredPrimary = 'minimax/MiniMax-M2.1';
+    const currentPrimary = config.agents.defaults.model.primary;
+    const allowlisted = config.agents.defaults.models && currentPrimary && config.agents.defaults.models[currentPrimary];
+    if (!currentPrimary || !allowlisted) {
+        config.agents.defaults.model.primary = desiredPrimary;
+    }
 } else {
     // Default to Anthropic without custom base URL (uses built-in pi-ai catalog)
     // Preserve a user-selected primary only when it is plausibly supported by the current config.
