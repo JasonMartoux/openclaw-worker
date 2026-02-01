@@ -282,6 +282,7 @@ if (isOpenAI) {
     config.models = config.models || {};
     config.models.providers = config.models.providers || {};
     config.models.providers.minimax = {
+        baseUrl: 'https://api.minimax.io/v1',
         apiKey: process.env.MINIMAX_API_KEY,
         models: [
             { id: 'MiniMax-M2.1', name: 'MiniMax M2.1', contextWindow: 1000000 },
