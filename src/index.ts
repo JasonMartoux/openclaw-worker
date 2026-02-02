@@ -21,7 +21,7 @@
  */
 
 import { Hono } from 'hono';
-import { getSandbox, Sandbox, type SandboxOptions } from '@cloudflare/sandbox';
+import { getSandbox, Sandbox as BaseSandbox, type SandboxOptions } from '@cloudflare/sandbox';
 
 import type { AppEnv, MoltbotEnv } from './types';
 import { MOLTBOT_PORT } from './config';
@@ -38,15 +38,31 @@ function transformErrorMessage(message: string, host: string): string {
   if (message.includes('gateway token missing') || message.includes('gateway token mismatch')) {
     return `Invalid or missing token. Visit https://${host}?token={REPLACE_WITH_YOUR_TOKEN}`;
   }
-  
+
   if (message.includes('pairing required')) {
     return `Pairing required. Visit https://${host}/_admin/`;
   }
-  
+
   return message;
 }
 
-export { Sandbox };
+/**
+ * Extended Sandbox class that wraps the alarm handler with error handling.
+ * The base @cloudflare/sandbox Sandbox class has internal alarm handlers for
+ * container lifecycle management that can throw exceptions when the container
+ * is in an unexpected state.
+ */
+export class Sandbox extends BaseSandbox {
+  async alarm(): Promise<void> {
+    try {
+      await super.alarm();
+    } catch (error) {
+      // Log the error but don't rethrow - this prevents the alarm from
+      // being marked as failed and retried repeatedly
+      console.error('[Sandbox] Alarm handler error (suppressed):', error);
+    }
+  }
+}
 
 /**
  * Validate required environment variables.
