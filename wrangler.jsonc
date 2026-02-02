@@ -37,7 +37,7 @@
     {
       "class_name": "Sandbox",
       "image": "./Dockerfile",
-      "instance_type": "standard-4",
+      "instance_type": "standard-1",
       "max_instances": 1,
     },
   ],
@@ -62,9 +62,9 @@
       "bucket_name": "openclaw-data","preview_bucket_name": "openclaw-data",
     },
   ],
-  // Cron trigger to sync openclaw data to R2 every 5 minutes
+  // Cron trigger to sync openclaw data to R2 every hour
   "triggers": {
-    "crons": ["0 */2 * * * "],
+    "crons": ["0 */1 * * * "],
   },
   // Browser Rendering binding for CDP shim
   "browser": {
