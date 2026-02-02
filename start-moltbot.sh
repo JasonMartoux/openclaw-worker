@@ -323,6 +323,18 @@ if (isOpenAI) {
     }
 }
 
+// Browser Rendering configuration (CDP proxy)
+if (process.env.CDP_SECRET && process.env.WORKER_URL) {
+    console.log('Configuring Browser Rendering with CDP proxy');
+    config.browser = config.browser || {};
+    config.browser.profiles = config.browser.profiles || {};
+    config.browser.profiles.cloudflare = {
+        cdpUrl: process.env.WORKER_URL.replace(/\/$/, '') + '/cdp?secret=' + encodeURIComponent(process.env.CDP_SECRET)
+    };
+    // Set as default profile
+    config.browser.defaultProfile = 'cloudflare';
+}
+
 // Write updated config
 fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
 console.log('Configuration updated successfully');
