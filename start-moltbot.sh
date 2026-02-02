@@ -201,15 +201,32 @@ if (process.env.TELEGRAM_BOT_TOKEN) {
     config.channels.telegram = config.channels.telegram || {};
     config.channels.telegram.botToken = process.env.TELEGRAM_BOT_TOKEN;
     config.channels.telegram.enabled = true;
-    config.channels.telegram.dmPolicy = process.env.TELEGRAM_DM_POLICY || 'pairing';
+    const telegramDmPolicy = process.env.TELEGRAM_DM_POLICY || 'pairing';
+    config.channels.telegram.dmPolicy = telegramDmPolicy;
+    if (process.env.TELEGRAM_DM_ALLOW_FROM) {
+        // Explicit allowlist: "123,456,789" → ['123', '456', '789']
+        config.channels.telegram.allowFrom = process.env.TELEGRAM_DM_ALLOW_FROM.split(',');
+    } else if (telegramDmPolicy === 'open') {
+        // "open" policy requires allowFrom: ["*"]
+        config.channels.telegram.allowFrom = ['*'];
+    }
 }
 
 // Discord configuration
+// Note: Discord uses nested dm.policy, not flat dmPolicy like Telegram
 if (process.env.DISCORD_BOT_TOKEN) {
     config.channels.discord = config.channels.discord || {};
     config.channels.discord.token = process.env.DISCORD_BOT_TOKEN;
     config.channels.discord.enabled = true;
-    config.channels.discord.dmPolicy = process.env.DISCORD_DM_POLICY || 'pairing';
+    // Remove old flat dmPolicy if present (migrating to nested dm.policy)
+    delete config.channels.discord.dmPolicy;
+    const discordDmPolicy = process.env.DISCORD_DM_POLICY || 'pairing';
+    config.channels.discord.dm = config.channels.discord.dm || {};
+    config.channels.discord.dm.policy = discordDmPolicy;
+    // "open" policy requires allowFrom: ["*"]
+    if (discordDmPolicy === 'open') {
+        config.channels.discord.dm.allowFrom = ['*'];
+    }
 }
 
 // Slack configuration
