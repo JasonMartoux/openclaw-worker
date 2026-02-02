@@ -163,6 +163,20 @@ if (config.models?.providers?.anthropic?.models) {
     }
 }
 
+// Clean up broken browser config from previous runs
+// (cloudflare profile was added without required 'color' field)
+if (config.browser?.profiles?.cloudflare && !config.browser.profiles.cloudflare.color) {
+    console.log('Removing broken browser profile config (missing color field)');
+    delete config.browser.profiles.cloudflare;
+    if (config.browser.defaultProfile === 'cloudflare') {
+        delete config.browser.defaultProfile;
+    }
+    // Remove browser section if empty
+    if (Object.keys(config.browser.profiles || {}).length === 0) {
+        delete config.browser;
+    }
+}
+
 
 
 // Gateway configuration
@@ -321,19 +335,6 @@ if (isOpenAI) {
     if (!currentPrimary || !keepPrimary) {
         config.agents.defaults.model.primary = defaultPrimary;
     }
-}
-
-// Browser Rendering configuration (CDP proxy)
-if (process.env.CDP_SECRET && process.env.WORKER_URL) {
-    console.log('Configuring Browser Rendering with CDP proxy');
-    config.browser = config.browser || {};
-    config.browser.profiles = config.browser.profiles || {};
-    config.browser.profiles.cloudflare = {
-        cdpUrl: process.env.WORKER_URL.replace(/\/$/, '') + '/cdp?secret=' + encodeURIComponent(process.env.CDP_SECRET),
-        color: '#f6821f'  // Cloudflare orange
-    };
-    // Set as default profile
-    config.browser.defaultProfile = 'cloudflare';
 }
 
 // Write updated config
