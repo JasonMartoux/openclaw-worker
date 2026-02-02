@@ -64,7 +64,7 @@
   ],
   // Cron trigger to sync openclaw data to R2 every hour
   "triggers": {
-    "crons": ["0 */1 * * * "],
+    "crons": ["0 */1 * * * "]
   },
   // Browser Rendering binding for CDP shim
   "browser": {
