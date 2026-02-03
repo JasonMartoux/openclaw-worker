@@ -53,9 +53,11 @@ function transformErrorMessage(message: string, host: string): string {
  * is in an unexpected state.
  */
 export class Sandbox extends BaseSandbox {
-  async alarm(): Promise<void> {
+  async alarm(alarmInfo?: AlarmInvocationInfo): Promise<void> {
     try {
-      await super.alarm();
+      // Provide default values if alarmInfo is undefined (fixes race condition bug in @cloudflare/sandbox)
+      const info = alarmInfo ?? { isRetry: false, retryCount: 0 };
+      await super.alarm(info);
     } catch (error) {
       // Log the error but don't rethrow - this prevents the alarm from
       // being marked as failed and retried repeatedly

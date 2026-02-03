@@ -39,19 +39,22 @@ export async function syncToR2(sandbox: Sandbox, env: MoltbotEnv): Promise<SyncR
   // Sanity check: verify source has critical files before syncing
   // This prevents accidentally overwriting a good backup with empty/corrupted data
   try {
-    const checkProc = await sandbox.startProcess('test -f /root/.clawdbot/clawdbot.json && echo "ok"');
+    // Use test -s to check file exists AND is not empty, then verify it's valid JSON
+    const checkProc = await sandbox.startProcess(
+      'test -s /root/.clawdbot/clawdbot.json && head -c 100 /root/.clawdbot/clawdbot.json | grep -q "^{" && echo "ok"'
+    );
     await waitForProcess(checkProc, 5000);
     const checkLogs = await checkProc.getLogs();
     if (!checkLogs.stdout?.includes('ok')) {
-      return { 
-        success: false, 
-        error: 'Sync aborted: source missing clawdbot.json',
-        details: 'The local config directory is missing critical files. This could indicate corruption or an incomplete setup.',
+      return {
+        success: false,
+        error: 'Sync aborted: clawdbot.json missing, empty, or invalid',
+        details: 'The config file is missing, empty, or does not start with valid JSON. Skipping backup to protect existing R2 data.',
       };
     }
   } catch (err) {
-    return { 
-      success: false, 
+    return {
+      success: false,
       error: 'Failed to verify source files',
       details: err instanceof Error ? err.message : 'Unknown error',
     };

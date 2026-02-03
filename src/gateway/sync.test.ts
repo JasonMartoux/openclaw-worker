@@ -44,15 +44,15 @@ describe('syncToR2', () => {
       startProcessMock
         .mockResolvedValueOnce(createMockProcess('s3fs on /data/moltbot type fuse.s3fs\n'))
         .mockResolvedValueOnce(createMockProcess('')); // No "ok" output
-      
+
       const env = createMockEnvWithR2();
 
       const result = await syncToR2(sandbox, env);
 
       // Error message still references clawdbot.json since that's the actual file name
       expect(result.success).toBe(false);
-      expect(result.error).toBe('Sync aborted: source missing clawdbot.json');
-      expect(result.details).toContain('missing critical files');
+      expect(result.error).toBe('Sync aborted: clawdbot.json missing, empty, or invalid');
+      expect(result.details).toContain('Skipping backup to protect existing R2 data');
     });
   });
 

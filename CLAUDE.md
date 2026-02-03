@@ -66,6 +66,18 @@ DEBUG_ROUTES=true       # Enables /debug/* routes
 
 Note: WebSocket proxying has issues with `wrangler dev`. Deploy to Cloudflare for full functionality.
 
+## Sandbox Container Lifecycle
+
+The `Sandbox` class in `src/index.ts` extends `@cloudflare/sandbox` with error handling for internal alarms.
+
+**Container sleep behavior** is controlled by `SANDBOX_SLEEP_AFTER`:
+- `never` (default): Container stays alive indefinitely (`keepAlive: true`)
+- Duration (e.g., `10m`, `1h`): Container sleeps after inactivity period
+
+**Important**: The cron backup runs every 30 minutes. If `SANDBOX_SLEEP_AFTER < 30m`, the container will cold start on each backup. Keep it `> 30m` or use the default `never`.
+
+**Known issue**: The `@cloudflare/sandbox` package has a race condition with internal alarms that causes `TypeError: Cannot read properties of undefined (reading 'isRetry')`. The custom `Sandbox` class wraps the alarm handler to catch and suppress these errors.
+
 ## Additional Guidelines
 
 See `AGENTS.md` for detailed patterns including:
