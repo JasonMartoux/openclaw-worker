@@ -62,7 +62,7 @@
       "bucket_name": "openclaw-data",
     },
   ],
-  // Cron trigger to sync openclaw data to R2 every 15 minutes
+  // Cron trigger to sync openclaw data to R2 every 15 minutes.
   "triggers": {
     "crons": ["*/15 * * * *"],
   },
