@@ -18,6 +18,8 @@ npm run dev           # Vite dev server (client only)
 
 This is a Cloudflare Worker that runs OpenClaw (formerly Moltbot/Clawdbot) personal AI assistant in a Cloudflare Sandbox container. The worker proxies HTTP/WebSocket requests to the OpenClaw gateway running inside the container.
 
+**Repository:** Fork of [cloudflare/moltworker](https://github.com/cloudflare/moltworker) with local customizations (MINIMAX_API_KEY, health check, openclaw-data bucket).
+
 **Important naming note:** The upstream CLI is still named `clawdbot`, so internal commands and config paths use that name despite the project being called "moltbot" or "OpenClaw".
 
 ## Architecture
@@ -41,12 +43,14 @@ Key architectural patterns:
 | File | Purpose |
 |------|---------|
 | `src/index.ts` | Main Hono app, middleware chain, catch-all proxy |
-| `src/gateway/process.ts` | Find/start gateway processes in container |
+| `src/gateway/process.ts` | Find/start gateway processes in container, health check |
 | `src/gateway/env.ts` | Build container environment variables |
 | `src/gateway/sync.ts` | R2 backup/restore sync logic |
+| `src/utils/logging.ts` | Log redaction for sensitive parameters |
 | `Dockerfile` | Container image (Node 22 + clawdbot CLI) |
 | `start-moltbot.sh` | Container startup script |
 | `wrangler.jsonc` | Cloudflare Worker configuration |
+| `test/e2e/` | E2E tests with Playwright (from upstream) |
 
 ## Testing
 
@@ -62,7 +66,13 @@ For local dev, create `.dev.vars`:
 ANTHROPIC_API_KEY=sk-ant-...
 DEV_MODE=true           # Skips CF Access auth + device pairing
 DEBUG_ROUTES=true       # Enables /debug/* routes
+E2E_TEST_MODE=true      # Skips CF Access auth only (keeps device pairing)
 ```
+
+**Additional env vars:**
+- `MINIMAX_API_KEY` - MiniMax API provider support
+- `TELEGRAM_DM_ALLOW_FROM` - Comma-separated Telegram user IDs allowlist
+- `R2_BUCKET_NAME` - Custom R2 bucket name (default: `openclaw-data`)
 
 Note: WebSocket proxying has issues with `wrangler dev`. Deploy to Cloudflare for full functionality.
 
@@ -93,6 +103,21 @@ The cron job (`*/15 * * * *`) syncs data from container to R2. Before syncing, a
 This prevents overwriting good backups with corrupted/empty data. If the check fails, sync is skipped and an error is logged (expected on cold starts before gateway runs).
 
 **Tip**: Enable R2 versioning in the Cloudflare dashboard to recover from accidental overwrites.
+
+## Syncing with Upstream
+
+This repo is a fork of `cloudflare/moltworker`. To sync:
+```bash
+git fetch upstream
+git merge upstream/main
+git push origin main
+```
+
+**Local customizations to preserve when merging:**
+- `MINIMAX_API_KEY` support in `src/gateway/env.ts` and `start-moltbot.sh`
+- `openclaw-data` R2 bucket name in `src/config.ts`
+- Gateway health check in `src/gateway/process.ts`
+- Sandbox alarm fix in `src/index.ts`
 
 ## Additional Guidelines
 
