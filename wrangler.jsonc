@@ -62,9 +62,9 @@
       "bucket_name": "openclaw-data","preview_bucket_name": "openclaw-data",
     },
   ],
-  // Cron trigger to sync openclaw data to R2 every 30 minutes
+  // Cron trigger to sync openclaw data to R2 every 15 minutes
   "triggers": {
-    "crons": ["*/30 * * * *"]
+    "crons": ["*/15 * * * *"]
   },
   // Browser Rendering binding for CDP shim
   "browser": {

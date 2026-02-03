@@ -33,7 +33,7 @@ Browser Request → Cloudflare Worker → Sandbox Container → OpenClaw Gateway
 Key architectural patterns:
 - **Request flow**: Public routes → CF Access auth → Gateway proxy (catch-all)
 - **WebSocket handling**: Custom message interception and error transformation
-- **Storage**: R2 backup/restore pattern (not direct mount) via cron every 30 minutes
+- **Storage**: R2 backup/restore pattern (not direct mount) via cron every 15 minutes
 - **Auth layers**: Cloudflare Access (admin) → Gateway Token → Device Pairing
 
 ## Key Files
@@ -74,7 +74,7 @@ The `Sandbox` class in `src/index.ts` extends `@cloudflare/sandbox` with error h
 - `never` (default): Container stays alive indefinitely (`keepAlive: true`)
 - Duration (e.g., `10m`, `1h`): Container sleeps after inactivity period
 
-**Important**: The cron backup runs every 30 minutes. If `SANDBOX_SLEEP_AFTER < 30m`, the container will cold start on each backup. Keep it `> 30m` or use the default `never`.
+**Important**: The cron backup runs every 15 minutes. If `SANDBOX_SLEEP_AFTER < 15m`, the container will cold start on each backup. Keep it `> 15m` or use the default `never`.
 
 **Known issue**: The `@cloudflare/sandbox` package has a race condition with internal alarms that causes `TypeError: Cannot read properties of undefined (reading 'isRetry')`. The custom `Sandbox` class wraps the alarm handler to catch and suppress these errors.
 
