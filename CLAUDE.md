@@ -76,7 +76,23 @@ The `Sandbox` class in `src/index.ts` extends `@cloudflare/sandbox` with error h
 
 **Important**: The cron backup runs every 15 minutes. If `SANDBOX_SLEEP_AFTER < 15m`, the container will cold start on each backup. Keep it `> 15m` or use the default `never`.
 
-**Known issue**: The `@cloudflare/sandbox` package has a race condition with internal alarms that causes `TypeError: Cannot read properties of undefined (reading 'isRetry')`. The custom `Sandbox` class wraps the alarm handler to catch and suppress these errors.
+**Known issue - Alarm race condition**: The `@cloudflare/sandbox` package has a race condition where two alarms fire simultaneously (~15ms apart). The first succeeds (~3min), the second crashes immediately (~12ms) with `TypeError: Cannot read properties of undefined (reading 'isRetry')`.
+
+The custom `Sandbox` class in `src/index.ts`:
+- Provides default `alarmInfo` values to fix crashes when `alarmInfo` is undefined
+- Wraps the alarm handler in try/catch to suppress errors
+
+**Note**: Some alarm errors still appear in logs because they occur at the Cloudflare runtime level *before* our code executes. These errors don't affect functionality - the first alarm always succeeds. This is a bug in `@cloudflare/sandbox` that cannot be fixed from our code.
+
+## R2 Backup Sync
+
+The cron job (`*/15 * * * *`) syncs data from container to R2. Before syncing, a sanity check verifies:
+1. `clawdbot.json` exists (`test -s` - not empty)
+2. File starts with `{` (valid JSON)
+
+This prevents overwriting good backups with corrupted/empty data. If the check fails, sync is skipped and an error is logged (expected on cold starts before gateway runs).
+
+**Tip**: Enable R2 versioning in the Cloudflare dashboard to recover from accidental overwrites.
 
 ## Additional Guidelines
 

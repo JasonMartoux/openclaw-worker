@@ -59,14 +59,21 @@ export async function mountR2Storage(sandbox: Sandbox, env: MoltbotEnv): Promise
     return true;
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : String(err);
+
+    // Handle "already in use" error - this means it's already mounted
+    if (errorMessage.includes('already in use') || errorMessage.includes('InvalidMountConfigError')) {
+      console.log('R2 bucket already mounted (detected via error)');
+      return true;
+    }
+
     console.log('R2 mount error:', errorMessage);
-    
+
     // Check again if it's mounted - the error might be misleading
     if (await isR2Mounted(sandbox)) {
       console.log('R2 bucket is mounted despite error');
       return true;
     }
-    
+
     // Don't fail if mounting fails - moltbot can still run without persistent storage
     console.error('Failed to mount R2 bucket:', err);
     return false;

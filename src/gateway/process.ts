@@ -4,6 +4,44 @@ import { MOLTBOT_PORT, STARTUP_TIMEOUT_MS } from '../config';
 import { buildEnvVars } from './env';
 import { mountR2Storage } from './r2';
 
+/** Health check timeout - shorter than startup timeout for quick checks */
+const HEALTH_CHECK_TIMEOUT_MS = 10_000; // 10 seconds
+
+export interface GatewayHealthResult {
+  healthy: boolean;
+  status: 'running' | 'not_running' | 'not_responding' | 'error';
+  processId?: string;
+  error?: string;
+}
+
+/**
+ * Check gateway health without starting it.
+ * Used for monitoring and auto-restart decisions.
+ */
+export async function checkGatewayHealth(sandbox: Sandbox): Promise<GatewayHealthResult> {
+  try {
+    const process = await findExistingMoltbotProcess(sandbox);
+
+    if (!process) {
+      return { healthy: false, status: 'not_running' };
+    }
+
+    // Check if port is reachable with a short timeout
+    try {
+      await process.waitForPort(MOLTBOT_PORT, { mode: 'tcp', timeout: HEALTH_CHECK_TIMEOUT_MS });
+      return { healthy: true, status: 'running', processId: process.id };
+    } catch {
+      return { healthy: false, status: 'not_responding', processId: process.id };
+    }
+  } catch (error) {
+    return {
+      healthy: false,
+      status: 'error',
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+}
+
 /**
  * Find an existing Moltbot gateway process
  * 

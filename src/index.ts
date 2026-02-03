@@ -26,7 +26,7 @@ import { getSandbox, Sandbox as BaseSandbox, type SandboxOptions } from '@cloudf
 import type { AppEnv, MoltbotEnv } from './types';
 import { MOLTBOT_PORT } from './config';
 import { createAccessMiddleware } from './auth';
-import { ensureMoltbotGateway, findExistingMoltbotProcess, syncToR2 } from './gateway';
+import { ensureMoltbotGateway, findExistingMoltbotProcess, syncToR2, checkGatewayHealth } from './gateway';
 import { publicRoutes, api, adminUi, debug, cdp } from './routes';
 import loadingPageHtml from './assets/loading.html';
 import configErrorHtml from './assets/config-error.html';
@@ -401,7 +401,8 @@ app.all('*', async (c) => {
 
 /**
  * Scheduled handler for cron triggers.
- * Syncs moltbot config/state from container to R2 for persistence.
+ * 1. Checks gateway health and restarts if needed
+ * 2. Syncs moltbot config/state from container to R2 for persistence
  */
 async function scheduled(
   _event: ScheduledEvent,
@@ -411,9 +412,33 @@ async function scheduled(
   const options = buildSandboxOptions(env);
   const sandbox = getSandbox(env.Sandbox, 'moltbot', options);
 
+  // Step 1: Health check with auto-restart
+  console.log('[cron] Checking gateway health...');
+  const health = await checkGatewayHealth(sandbox);
+
+  // Log structured health status for monitoring
+  console.log('[cron] Health check result:', JSON.stringify({
+    healthy: health.healthy,
+    status: health.status,
+    processId: health.processId,
+    timestamp: new Date().toISOString(),
+  }));
+
+  if (!health.healthy) {
+    console.warn('[cron] Gateway unhealthy, attempting restart...');
+    try {
+      await ensureMoltbotGateway(sandbox, env);
+      console.log('[cron] Gateway restarted successfully');
+    } catch (error) {
+      console.error('[cron] Gateway restart failed:', error instanceof Error ? error.message : error);
+      // Continue with backup sync even if restart failed
+    }
+  }
+
+  // Step 2: Backup sync to R2
   console.log('[cron] Starting backup sync to R2...');
   const result = await syncToR2(sandbox, env);
-  
+
   if (result.success) {
     console.log('[cron] Backup sync completed successfully at', result.lastSync);
   } else {
