@@ -44,7 +44,7 @@ export async function checkGatewayHealth(sandbox: Sandbox): Promise<GatewayHealt
 
 /**
  * Find an existing Moltbot gateway process
- * 
+ *
  * @param sandbox - The sandbox instance
  * @returns The process if found and running/starting, null otherwise
  */
@@ -54,13 +54,13 @@ export async function findExistingMoltbotProcess(sandbox: Sandbox): Promise<Proc
     for (const proc of processes) {
       // Only match the gateway process, not CLI commands like "clawdbot devices list"
       // Note: CLI is still named "clawdbot" until upstream renames it
-      const isGatewayProcess = 
+      const isGatewayProcess =
         proc.command.includes('start-moltbot.sh') ||
         proc.command.includes('clawdbot gateway');
-      const isCliCommand = 
+      const isCliCommand =
         proc.command.includes('clawdbot devices') ||
         proc.command.includes('clawdbot --version');
-      
+
       if (isGatewayProcess && !isCliCommand) {
         if (proc.status === 'starting' || proc.status === 'running') {
           return proc;
@@ -75,12 +75,12 @@ export async function findExistingMoltbotProcess(sandbox: Sandbox): Promise<Proc
 
 /**
  * Ensure the Moltbot gateway is running
- * 
+ *
  * This will:
  * 1. Mount R2 storage if configured
  * 2. Check for an existing gateway process
  * 3. Wait for it to be ready, or start a new one
- * 
+ *
  * @param sandbox - The sandbox instance
  * @param env - Worker environment bindings
  * @returns The running gateway process
@@ -157,6 +157,6 @@ export async function ensureMoltbotGateway(sandbox: Sandbox, env: MoltbotEnv): P
 
   // Verify gateway is actually responding
   console.log('[Gateway] Verifying gateway health...');
-  
+
   return process;
 }

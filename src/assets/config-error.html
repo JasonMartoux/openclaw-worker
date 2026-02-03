@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Configuration Error - OpenClaw Worker
+  <title>Configuration Error - OpenClaw Worker</title>
   <style>
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
-    
+
     body {
       min-height: 100vh;
       display: flex;
@@ -22,37 +22,37 @@
       color: #e0e0e0;
       padding: 20px;
     }
-    
+
     .container {
       text-align: center;
       max-width: 600px;
     }
-    
+
     .logo {
       width: 200px;
       height: auto;
       margin-bottom: 40px;
     }
-    
+
     .icon {
       font-size: 4rem;
       margin-bottom: 20px;
     }
-    
+
     h1 {
       font-size: 1.5rem;
       font-weight: 500;
       margin-bottom: 16px;
       color: #f87171;
     }
-    
+
     .message {
       font-size: 1rem;
       color: #a0a0a0;
       margin-bottom: 30px;
       line-height: 1.6;
     }
-    
+
     .error-box {
       background: rgba(248, 113, 113, 0.1);
       border: 1px solid rgba(248, 113, 113, 0.3);
@@ -61,14 +61,14 @@
       margin-bottom: 30px;
       text-align: left;
     }
-    
+
     .error-box h2 {
       font-size: 0.9rem;
       color: #f87171;
       margin-bottom: 12px;
       font-weight: 500;
     }
-    
+
     .missing-vars {
       font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
       font-size: 0.85rem;
@@ -78,7 +78,7 @@
       border-radius: 4px;
       word-break: break-all;
     }
-    
+
     .instructions {
       background: rgba(96, 165, 250, 0.1);
       border: 1px solid rgba(96, 165, 250, 0.3);
@@ -86,21 +86,21 @@
       padding: 20px;
       text-align: left;
     }
-    
+
     .instructions h2 {
       font-size: 0.9rem;
       color: #60a5fa;
       margin-bottom: 12px;
       font-weight: 500;
     }
-    
+
     .instructions p {
       font-size: 0.85rem;
       color: #a0a0a0;
       margin-bottom: 12px;
       line-height: 1.5;
     }
-    
+
     .instructions code {
       font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
       font-size: 0.8rem;
@@ -109,7 +109,7 @@
       border-radius: 3px;
       color: #4ade80;
     }
-    
+
     .instructions pre {
       font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
       font-size: 0.8rem;
@@ -120,27 +120,27 @@
       overflow-x: auto;
       margin-top: 8px;
     }
-    
+
     .instructions a {
       color: rgb(244, 129, 32);
       text-decoration: none;
     }
-    
+
     .instructions a:hover {
       text-decoration: underline;
     }
-    
+
     .info {
       font-size: 0.8rem;
       color: #707070;
       margin-top: 30px;
     }
-    
+
     .info a {
       color: rgb(244, 129, 32);
       text-decoration: none;
     }
-    
+
     .info a:hover {
       text-decoration: underline;
     }
@@ -155,18 +155,18 @@
     <p class="message">
       OpenClaw Worker cannot start because required environment variables are not configured.
     </p>
-    
+
     <div class="error-box">
       <h2>Missing Variables</h2>
       <div class="missing-vars">{{MISSING_VARS}}</div>
     </div>
-    
+
     <div class="instructions">
       <h2>How to Fix</h2>
       <p>Set the missing secrets using the Wrangler CLI:</p>
       <pre>wrangler secret put &lt;VARIABLE_NAME&gt;</pre>
       <p style="margin-top: 16px;">
-        For example: <code>wrangler secret put MINIMAX_API_KEY</code>
+        For example: <code>wrangler secret put ANTHROPIC_API_KEY</code>
       </p>
       <p style="margin-bottom: 0;">
         After setting the secrets, refresh this page to continue.

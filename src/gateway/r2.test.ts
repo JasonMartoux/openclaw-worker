@@ -1,11 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { mountR2Storage } from './r2';
-import { 
-  createMockEnv, 
-  createMockEnvWithR2, 
-  createMockProcess, 
-  createMockSandbox, 
-  suppressConsole 
+import {
+  createMockEnv,
+  createMockEnvWithR2,
+  createMockProcess,
+  createMockSandbox,
+  suppressConsole
 } from '../test-utils';
 
 describe('mountR2Storage', () => {
@@ -88,6 +88,25 @@ describe('mountR2Storage', () => {
       );
     });
 
+    it('uses custom bucket name from R2_BUCKET_NAME env var', async () => {
+      const { sandbox, mountBucketMock } = createMockSandbox({ mounted: false });
+      const env = createMockEnvWithR2({
+        R2_ACCESS_KEY_ID: 'key123',
+        R2_SECRET_ACCESS_KEY: 'secret',
+        CF_ACCOUNT_ID: 'account123',
+        R2_BUCKET_NAME: 'moltbot-e2e-test123',
+      });
+
+      const result = await mountR2Storage(sandbox, env);
+
+      expect(result).toBe(true);
+      expect(mountBucketMock).toHaveBeenCalledWith(
+        'moltbot-e2e-test123',
+        '/data/moltbot',
+        expect.any(Object)
+      );
+    });
+
     it('returns true immediately when bucket is already mounted', async () => {
       const { sandbox, mountBucketMock } = createMockSandbox({ mounted: true });
       const env = createMockEnvWithR2();
@@ -121,7 +140,7 @@ describe('mountR2Storage', () => {
       startProcessMock
         .mockResolvedValueOnce(createMockProcess(''))
         .mockResolvedValueOnce(createMockProcess(''));
-      
+
       const env = createMockEnvWithR2();
 
       const result = await mountR2Storage(sandbox, env);
@@ -138,9 +157,9 @@ describe('mountR2Storage', () => {
       startProcessMock
         .mockResolvedValueOnce(createMockProcess(''))
         .mockResolvedValueOnce(createMockProcess('s3fs on /data/moltbot type fuse.s3fs\n'));
-      
+
       mountBucketMock.mockRejectedValue(new Error('Transient error'));
-      
+
       const env = createMockEnvWithR2();
 
       const result = await mountR2Storage(sandbox, env);

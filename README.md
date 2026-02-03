@@ -175,7 +175,7 @@ By default, moltbot data (configs, paired devices, conversation history) is lost
 1. Go to **R2** > **Overview** in the [Cloudflare Dashboard](https://dash.cloudflare.com/)
 2. Click **Manage R2 API Tokens**
 3. Create a new token with **Object Read & Write** permissions
-4. Select the `moltbot-data` bucket (created automatically on first deploy)
+4. Select the `openclaw-data` bucket (created automatically on first deploy)
 5. Copy the **Access Key ID** and **Secret Access Key**
 
 ### 2. Set Secrets
@@ -202,7 +202,7 @@ R2 storage uses a backup/restore approach for simplicity:
 - OpenClaw uses its default paths (no special configuration needed)
 
 **During operation:**
-- A cron job runs every 5 minutes to sync the moltbot config to R2
+- A cron job runs every 15 minutes to sync the moltbot config to R2
 - You can also trigger a manual backup from the admin UI at `/_admin/`
 
 **In the admin UI:**
@@ -359,32 +359,18 @@ The `AI_GATEWAY_*` variables take precedence over `ANTHROPIC_*` if both are set.
 
 ## Optional: MiniMax Provider
 
-To use the MiniMax provider, set the `MINIMAX_API_KEY` secret and configure the provider in your OpenClaw config file (`clawdbot.json`):
+To use the MiniMax provider, set the `MINIMAX_API_KEY` secret:
 
 ```bash
 npx wrangler secret put MINIMAX_API_KEY
 ```
 
-Then add a `minimax` entry under `models.providers` in the config (via the Control UI or by editing the config directly):
+The MiniMax provider will be automatically configured with the following models:
+- MiniMax M2.1
+- MiniMax M2.1 Lightning
+- MiniMax M2
 
-```json
-{
-  "models": {
-    "providers": {
-      "minimax": {
-        "baseUrl": "<your MiniMax-compatible API base URL>",
-        "api": "anthropic-messages",
-        "apiKey": "${MINIMAX_API_KEY}",
-        "models": [
-          { "id": "<model-id>", "name": "<display name>", "contextWindow": 200000 }
-        ]
-      }
-    }
-  }
-}
-```
-
-The `MINIMAX_API_KEY` environment variable is forwarded into the container automatically. If you set `model.primary` to a minimax model in the config, it will be preserved across restarts.
+If `MINIMAX_API_KEY` is set and no other API key (Anthropic, AI Gateway) is configured, MiniMax will be used as the primary provider.
 
 ## All Secrets Reference
 
@@ -400,13 +386,16 @@ The `MINIMAX_API_KEY` environment variable is forwarded into the container autom
 | `CF_ACCESS_AUD` | Yes* | Cloudflare Access application audience (required for admin UI) |
 | `MOLTBOT_GATEWAY_TOKEN` | Yes | Gateway token for authentication (pass via `?token=` query param) |
 | `DEV_MODE` | No | Set to `true` to skip CF Access auth + device pairing (local dev only) |
+| `E2E_TEST_MODE` | No | Set to `true` to skip CF Access auth but keep device pairing (E2E tests) |
 | `DEBUG_ROUTES` | No | Set to `true` to enable `/debug/*` routes |
 | `SANDBOX_SLEEP_AFTER` | No | Container sleep timeout: `never` (default) or duration like `10m`, `1h` |
 | `R2_ACCESS_KEY_ID` | No | R2 access key for persistent storage |
 | `R2_SECRET_ACCESS_KEY` | No | R2 secret key for persistent storage |
+| `R2_BUCKET_NAME` | No | Override R2 bucket name (default: `openclaw-data`) |
 | `CF_ACCOUNT_ID` | No | Cloudflare account ID (required for R2 storage) |
 | `TELEGRAM_BOT_TOKEN` | No | Telegram bot token |
 | `TELEGRAM_DM_POLICY` | No | Telegram DM policy: `pairing` (default) or `open` |
+| `TELEGRAM_DM_ALLOW_FROM` | No | Comma-separated list of Telegram user IDs to allow |
 | `DISCORD_BOT_TOKEN` | No | Discord bot token |
 | `DISCORD_DM_POLICY` | No | Discord DM policy: `pairing` (default) or `open` |
 | `SLACK_BOT_TOKEN` | No | Slack bot token |
