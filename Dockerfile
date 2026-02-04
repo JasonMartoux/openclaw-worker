@@ -25,6 +25,9 @@ RUN npm install -g pnpm
 RUN npm install -g clawdbot@2026.1.24-3 \
     && clawdbot --version
 
+# Install Honcho plugin for memory integration
+RUN clawdbot plugins install @honcho-ai/openclaw-honcho || echo "Honcho plugin install failed (will retry at runtime)"
+
 # Create moltbot directories (paths still use clawdbot until upstream renames)
 # Templates are stored in /root/.clawdbot-templates for initialization
 # Workspace is inside .clawdbot so it gets backed up to R2 automatically

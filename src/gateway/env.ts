@@ -33,6 +33,13 @@ export function buildEnvVars(env: MoltbotEnv): Record<string, string> {
   if (env.MINIMAX_API_KEY) {
     envVars.MINIMAX_API_KEY = env.MINIMAX_API_KEY;
   }
+  // Honcho memory integration
+  if (env.HONCHO_API_KEY) {
+    envVars.HONCHO_API_KEY = env.HONCHO_API_KEY;
+  }
+  if (env.HONCHO_BASE_URL) {
+    envVars.HONCHO_BASE_URL = env.HONCHO_BASE_URL;
+  }
 
   // Pass base URL (used by start-moltbot.sh to determine provider)
   if (normalizedBaseUrl) {

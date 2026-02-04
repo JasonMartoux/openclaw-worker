@@ -256,6 +256,19 @@ if (process.env.SLACK_BOT_TOKEN && process.env.SLACK_APP_TOKEN) {
     config.channels.slack.enabled = true;
 }
 
+// Honcho memory integration
+if (process.env.HONCHO_API_KEY) {
+    console.log('Configuring Honcho memory integration');
+    config.integrations = config.integrations || {};
+    config.integrations.honcho = {
+        enabled: true,
+        apiKey: process.env.HONCHO_API_KEY
+    };
+    if (process.env.HONCHO_BASE_URL) {
+        config.integrations.honcho.baseUrl = process.env.HONCHO_BASE_URL;
+    }
+}
+
 // Base URL override (e.g., for Cloudflare AI Gateway)
 // Usage: Set AI_GATEWAY_BASE_URL or ANTHROPIC_BASE_URL to your endpoint like:
 //   https://gateway.ai.cloudflare.com/v1/{account_id}/{gateway_id}/anthropic

@@ -16,6 +16,9 @@ export interface MoltbotEnv {
   OPENAI_API_KEY?: string;
   // MiniMax provider (OpenClaw/OpenClawd)
   MINIMAX_API_KEY?: string;
+  // Honcho memory integration
+  HONCHO_API_KEY?: string;
+  HONCHO_BASE_URL?: string; // Optional: for self-hosted (default: https://api.honcho.dev)
   MOLTBOT_GATEWAY_TOKEN?: string; // Gateway token (mapped to CLAWDBOT_GATEWAY_TOKEN for container)
 
   CLAWDBOT_BIND_MODE?: string;
