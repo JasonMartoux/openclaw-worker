@@ -256,17 +256,10 @@ if (process.env.SLACK_BOT_TOKEN && process.env.SLACK_APP_TOKEN) {
     config.channels.slack.enabled = true;
 }
 
-// Honcho memory integration
+// Honcho memory integration - plugin uses env vars directly (HONCHO_API_KEY, HONCHO_BASE_URL)
+// No config file changes needed - just log that it's available
 if (process.env.HONCHO_API_KEY) {
-    console.log('Configuring Honcho memory integration');
-    config.integrations = config.integrations || {};
-    config.integrations.honcho = {
-        enabled: true,
-        apiKey: process.env.HONCHO_API_KEY
-    };
-    if (process.env.HONCHO_BASE_URL) {
-        config.integrations.honcho.baseUrl = process.env.HONCHO_BASE_URL;
-    }
+    console.log('Honcho memory integration enabled (via HONCHO_API_KEY env var)');
 }
 
 // Base URL override (e.g., for Cloudflare AI Gateway)
