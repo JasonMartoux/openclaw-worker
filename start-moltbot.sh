@@ -192,8 +192,7 @@ if (workerUrlEnv && cdpSecretEnv) {
     config.browser.profiles = config.browser.profiles || {};
     config.browser.profiles.cloudflare = {
         cdpUrl: cdpUrl,
-        color: '#FF6B00',
-        name: 'Cloudflare Browser'
+        color: '#FF6B00'
     };
     config.browser.defaultProfile = 'cloudflare';
 }
