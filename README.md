@@ -209,6 +209,15 @@ R2 storage uses a backup/restore approach for simplicity:
 - When R2 is configured, you'll see "Last backup: [timestamp]"
 - Click "Backup Now" to trigger an immediate sync
 
+**What gets backed up:**
+- Configuration (`clawdbot.json`)
+- Paired devices and conversation history
+- Agent workspace files (SOUL.md, USER.md, AGENTS.md, IDENTITY.md, etc.)
+- Memory logs (`memory/` directory)
+- Custom skills
+
+**Excluded from backup:** `node_modules/`, `.git/`, `.cache/`, `dist/`, `build/`
+
 Without R2 credentials, moltbot still works but uses ephemeral storage (data lost on container restart).
 
 ## Container Lifecycle
@@ -306,7 +315,7 @@ All endpoints require the `CDP_SECRET` header for authentication.
 
 ## Built-in Skills
 
-The container includes pre-installed skills in `/root/clawd/skills/`:
+The container includes pre-installed skills in `/root/.clawdbot/workspace/skills/`:
 
 ### cloudflare-browser
 
@@ -320,10 +329,10 @@ Browser automation via the CDP shim. Requires `CDP_SECRET` and `WORKER_URL` to b
 **Usage:**
 ```bash
 # Screenshot
-node /root/clawd/skills/cloudflare-browser/scripts/screenshot.js https://example.com output.png
+node /root/.clawdbot/workspace/skills/cloudflare-browser/scripts/screenshot.js https://example.com output.png
 
 # Video from multiple URLs
-node /root/clawd/skills/cloudflare-browser/scripts/video.js "https://site1.com,https://site2.com" output.mp4 --scroll
+node /root/.clawdbot/workspace/skills/cloudflare-browser/scripts/video.js "https://site1.com,https://site2.com" output.mp4 --scroll
 ```
 
 See `skills/cloudflare-browser/SKILL.md` for full documentation.
