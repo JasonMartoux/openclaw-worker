@@ -62,7 +62,9 @@ export async function syncToR2(sandbox: Sandbox, env: MoltbotEnv): Promise<SyncR
 
   // Run rsync to backup config to R2
   // Note: Use --no-times because s3fs doesn't support setting timestamps
-  const syncCmd = `rsync -r --no-times --delete --exclude='*.lock' --exclude='*.log' --exclude='*.tmp' /root/.clawdbot/ ${R2_MOUNT_PATH}/clawdbot/ && rsync -r --no-times --delete /root/clawd/skills/ ${R2_MOUNT_PATH}/skills/ && date -Iseconds > ${R2_MOUNT_PATH}/.last-sync`;
+  // Workspace is now inside /root/.clawdbot/, so one sync covers everything (config, workspace, skills)
+  // Exclude node_modules, .git, and other large/transient directories
+  const syncCmd = `rsync -r --no-times --delete --exclude='*.lock' --exclude='*.log' --exclude='*.tmp' --exclude='node_modules' --exclude='.git' --exclude='.cache' --exclude='dist' --exclude='build' /root/.clawdbot/ ${R2_MOUNT_PATH}/clawdbot/ && date -Iseconds > ${R2_MOUNT_PATH}/.last-sync`;
 
   try {
     const proc = await sandbox.startProcess(syncCmd);

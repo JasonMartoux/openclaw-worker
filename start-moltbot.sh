@@ -94,14 +94,15 @@ else
     echo "R2 not mounted, starting fresh"
 fi
 
-# Restore skills from R2 backup if available (only if R2 is newer)
-SKILLS_DIR="/root/clawd/skills"
+# Restore skills from R2 backup if available (legacy format - skills in separate dir)
+# New format has skills inside clawdbot/workspace/skills/ which is restored above
+SKILLS_DIR="/root/.clawdbot/workspace/skills"
 if [ -d "$BACKUP_DIR/skills" ] && [ "$(ls -A $BACKUP_DIR/skills 2>/dev/null)" ]; then
     if should_restore_from_r2; then
-        echo "Restoring skills from $BACKUP_DIR/skills..."
+        echo "Restoring skills from legacy $BACKUP_DIR/skills..."
         mkdir -p "$SKILLS_DIR"
         cp -a "$BACKUP_DIR/skills/." "$SKILLS_DIR/"
-        echo "Restored skills from R2 backup"
+        echo "Restored skills from legacy R2 backup"
     fi
 fi
 
@@ -112,11 +113,12 @@ if [ ! -f "$CONFIG_FILE" ]; then
         cp "$TEMPLATE_FILE" "$CONFIG_FILE"
     else
         # Create minimal config if template doesn't exist
+        # Use /root/.clawdbot/workspace so files are automatically backed up to R2
         cat > "$CONFIG_FILE" << 'EOFCONFIG'
 {
   "agents": {
     "defaults": {
-      "workspace": "/root/clawd"
+      "workspace": "/root/.clawdbot/workspace"
     }
   },
   "gateway": {
@@ -177,6 +179,24 @@ if (config.browser?.profiles?.cloudflare && !config.browser.profiles.cloudflare.
     }
 }
 
+// Browser Rendering CDP configuration
+// Automatically configure cdpUrl from WORKER_URL and CDP_SECRET (both optional)
+const workerUrlEnv = (process.env.WORKER_URL || '').trim();
+const cdpSecretEnv = (process.env.CDP_SECRET || '').trim();
+if (workerUrlEnv && cdpSecretEnv) {
+    const workerUrl = workerUrlEnv.replace(/\/$/, ''); // Remove trailing slash
+    const cdpUrl = \`wss://\${workerUrl.replace(/^https?:\\/\\//, '')}/cdp?secret=\${encodeURIComponent(cdpSecretEnv)}\`;
+    console.log('Configuring browser profile with CDP URL:', workerUrl + '/cdp');
+
+    config.browser = config.browser || {};
+    config.browser.profiles = config.browser.profiles || {};
+    config.browser.profiles.cloudflare = {
+        cdpUrl: cdpUrl,
+        color: '#FF6B00',
+        name: 'Cloudflare Browser'
+    };
+    config.browser.defaultProfile = 'cloudflare';
+}
 
 // Gateway configuration
 config.gateway.port = 18789;

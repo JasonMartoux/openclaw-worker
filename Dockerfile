@@ -27,10 +27,11 @@ RUN npm install -g clawdbot@2026.1.24-3 \
 
 # Create moltbot directories (paths still use clawdbot until upstream renames)
 # Templates are stored in /root/.clawdbot-templates for initialization
+# Workspace is inside .clawdbot so it gets backed up to R2 automatically
 RUN mkdir -p /root/.clawdbot \
-    && mkdir -p /root/.clawdbot-templates \
-    && mkdir -p /root/clawd \
-    && mkdir -p /root/clawd/skills
+    && mkdir -p /root/.clawdbot/workspace \
+    && mkdir -p /root/.clawdbot/workspace/skills \
+    && mkdir -p /root/.clawdbot-templates
 
 # Copy startup script
 # Build cache bust: 2026-02-02-v30-browser-rendering
@@ -41,10 +42,10 @@ RUN chmod +x /usr/local/bin/start-moltbot.sh
 COPY moltbot.json.template /root/.clawdbot-templates/moltbot.json.template
 
 # Copy custom skills
-COPY skills/ /root/clawd/skills/
+COPY skills/ /root/.clawdbot/workspace/skills/
 
 # Set working directory
-WORKDIR /root/clawd
+WORKDIR /root/.clawdbot/workspace
 
 # Expose the gateway port
 EXPOSE 18789
